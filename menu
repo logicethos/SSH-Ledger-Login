@@ -1,0 +1,48 @@
+#!/bin/bash
+
+readarray SERVERS < /server.list
+
+OPTIONS=()
+for ((i=0;i<${#SERVERS[@]};i++))
+{
+      itemno=$(($i + 1))
+
+      SERVERSplit=(${SERVERS[$i]// / })
+      HOST=${SERVERSplit[0]}
+      if [[ ${#SERVERSplit[@]} == 1 ]]; then HNAME=${SERVERSplit[0]}; else HNAME=${SERVERSplit[1]}; fi
+      OPTIONS+=($itemno "${HNAME}")
+}
+
+
+HEIGHT=0
+WIDTH=0
+CHOICE_HEIGHT=0
+BACKTITLE="TFA SERVERS - F2 NEW Window   F3 PREVIOUS Window   F4 NEXT Window"
+TITLE="SERVERS"
+MENU="Choose one of the following options:"
+
+while true
+do
+CHOICE=$(dialog --clear \
+                --backtitle "$BACKTITLE" \
+                --title "$TITLE" \
+                --menu "$MENU" \
+                $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                "${OPTIONS[@]}" \
+                2>&1 >/dev/tty)
+
+clear
+
+itemno=$(($CHOICE - 1))
+
+URL=${SERVERS[$itemno]}
+
+
+if [[ "$CHOICE" =~ ^[0-9]+$ ]] 2> /dev/null
+then
+	source menu_connect $URL ${OPTIONS[$itemno]}
+	if [ $? -ne 0 ]; then read -p "press any key";fi
+else
+        exit 0
+fi
+done

@@ -1,0 +1,78 @@
+#!/bin/bash
+
+URL=$1
+if [ -z "$URL" ]; then
+  echo "No Host given."
+  exit
+fi
+
+NAME=$2
+if [ -z "$NAME" ]; then NAME=URL;fi
+
+
+while true
+do
+  INT=$(lsusb -v -d 2c97:0001 | grep -Po '(?<=bNumInterfaces)\s*\d')
+  if [[ $INT -eq 1 ]]
+  then
+    break
+  else
+    dialog --title "Ledger" --msgbox 'Please connect Ledger, and select SSH Agent' 0 0
+    if [ $? -ne 0 ]; then exit 1;fi
+  fi
+done
+
+GetLedgerKey() {
+   if [ -z "$LedgerKey" ] || [ ! -f $LedgerKey ]; then
+     LedgerKey="$(mktemp).pub"
+     echo "Please check Ledger screen ${LedgerKey}"
+     ledger-agent $URL > ${LedgerKey}
+     chmod 600 ${LedgerKey}
+   fi  
+} 
+
+tmux rename-window -t${TMUX_PANE} "${NAME}"
+
+OPTIONS2=(1 "CONNECT"
+         2 "Send Public Key")
+
+HEIGHT2=0
+WIDTH2=50
+CHOICE_HEIGHT2=0
+BACKTITLE2="TFA SERVERS - F2 NEW Window   F3 PREVIOUS Window   F4 NEXT Window"
+TITLE2="$NAME $URL"
+MENU2="Choose one of the following options:"
+
+CHOICE=$(dialog --clear \
+                --backtitle "$BACKTITLE2" \
+                --title "$TITLE2" \
+                --menu "$MENU2" \
+                $HEIGHT2 $WIDTH2 $CHOICE_HEIGHT2 \
+                "${OPTIONS2[@]}" \
+                2>&1 >/dev/tty)
+
+clear
+
+
+URLSplit=(${URL//:/ })
+HOST=${URLSplit[0]}
+if [[ ${#URLSplit[@]} == 1 ]]; then PORT="22"; else PORT="${URLSplit[1]}";fi
+
+#URLSplit=(${URL//@/ })
+#USER=${URLSplit[0]}
+#if [[ ${#URLSplit[@]} == 1 ]]; then USER="root"; else USER="${URLSplit[0]}";fi
+
+
+case $CHOICE in
+        1)
+            ledger-agent -c $URL
+            ;;
+        2)
+            GetLedgerKey
+            ssh-copy-id -p $PORT -i ${LedgerKey} $HOST
+            ;;
+esac
+
+if [ $? -ne 0 ]; then read -p "press any key";fi
+
+return 0
