@@ -1,6 +1,6 @@
 #!/bin/bash
 
-readarray SERVERS < server.list
+readarray SERVERS < /server.list
 
 OPTIONS=()
 for ((i=0;i<${#SERVERS[@]};i++))

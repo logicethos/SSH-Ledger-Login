@@ -40,5 +40,13 @@ Install the SSH/PGP Agent application
 [See first part of this guide](https://thoughts.t37.net/a-step-by-step-guide-to-securing-your-ssh-keys-with-the-ledger-nano-s-92e58c64a005)
 
 #### To login from a Linux Client
-TODO
-docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb ledger-ssh
+
+Create a server.list file:
+```
+[<user>@]host1[:port] my-server-name1
+[<user>@]host2[:port] my-server-name2
+```
+```
+docker build -t ledger-ssh .
+docker run --rm -it --privileged -e SNAME="user" -v /dev/bus/usb:/dev/bus/usb ledger-ssh
+```
