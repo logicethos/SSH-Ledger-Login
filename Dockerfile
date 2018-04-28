@@ -25,4 +25,8 @@ RUN chmod 700 /root/.ssh
 COPY ssh_config /root/.ssh/config
 RUN chmod 400 /root/.ssh/config
 
+COPY ssh-copy-id.patch /ssh-copy-id.patch
+RUN patch /usr/bin/ssh-copy-id < /ssh-copy-id.patch
+RUN rm /ssh-copy-id.patch
+
 ENTRYPOINT /entrypoint.sh

@@ -9,7 +9,7 @@
 # Users added to the sysadmin group, will get passwordless sudo (i.e full root access).
 #
 # To add new users (with optional sysadmin):
-#   useradd -m -s /bin/bash -G keyset,sysadmin <User>
+#   useradd -m -G keyset,sysadmin <User>
 # Set a temporary password
 #   passwd <user>
 #
@@ -44,15 +44,21 @@ EOL
 
 
 #Create the login script for sshd
-cat > /usr/local/bin/keyset-remove << EOL
+cat > /usr/local/bin/keyset-remove << \EOL
 #!/bin/sh
 
-if echo $SSH_ORIGINAL_COMMAND | grep -1 "authorized_keys"; then
-   $($SSH_ORIGINAL_COMMAND) 
-   sudo deluser $USER keyset
+if echo $SSH_ORIGINAL_COMMAND | grep -q "LedgerKey"; then
+   cd
+   umask 077
+   mkdir -p .ssh && cat >> .ssh/authorized_keys || exit 1
+   if type restorecon >/dev/null 2>&1 ; then restorecon -F .ssh .ssh/authorized_keys ; fi
    sudo usermod -a -G keyonly $USER
+   sudo deluser $USER keyset
+   sudo usermod --shell /bin/bash $USER
+   echo "Server says, Thank you."
 else
-   echo "Where is your Ledger?"
+   echo $($SSH_ORIGINAL_COMMAND)
+   echo "Error: not what I was expecting!"
 fi;
 EOL
 
@@ -63,6 +69,7 @@ chmod +x /usr/local/bin/keyset-remove
 
 cat >> /etc/sudoers << EOL
 %sysadmin ALL=(ALL) NOPASSWD: ALL
-%keyset ALL = (root) NOPASSWD: /usr/bin/deluser
+%keyset ALL = (root) NOPASSWD: /usr/sbin/deluser
+%keyset ALL = (root) NOPASSWD: /usr/sbin/usermod
 
 EOL

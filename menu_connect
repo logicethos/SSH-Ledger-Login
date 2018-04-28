@@ -69,6 +69,7 @@ case $CHOICE in
         2)
             GetLedgerKey
             ssh-copy-id -p $PORT -i ${LedgerKey} $HOST
+            read -p "press any key"
             ;;
 esac
 

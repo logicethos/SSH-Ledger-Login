@@ -1,0 +1,33 @@
+--- /usr/bin/ssh-copy-id	2017-03-20 02:39:27.000000000 +0000
++++ ssh-copy-id	2018-04-28 23:04:16.545077084 +0100
+@@ -289,29 +289,11 @@
+     populate_new_ids 0
+     # in ssh below - to defend against quirky remote shells: use 'exec sh -c' to get POSIX; 'cd' to be at $HOME; and all on one line, because tcsh.
+     [ "$DRY_RUN" ] || printf '%s\n' "$NEW_IDS" | \
+-      ssh "$@" "exec sh -c 'cd ; umask 077 ; mkdir -p .ssh && cat >> .ssh/authorized_keys || exit 1 ; if type restorecon >/dev/null 2>&1 ; then restorecon -F .ssh .ssh/authorized_keys ; fi'" \
++      ssh "$@" "LedgerKey" \
+       || exit 1
+     ADDED=$(printf '%s\n' "$NEW_IDS" | wc -l)
+     ;;
+ esac
+ 
+-if [ "$DRY_RUN" ] ; then
+-  cat <<-EOF
+-	=-=-=-=-=-=-=-=
+-	Would have added the following key(s):
+-
+-	$NEW_IDS
+-	=-=-=-=-=-=-=-=
+-	EOF
+-else
+-  cat <<-EOF
+-
+-	Number of key(s) added: $ADDED
+-
+-	Now try logging into the machine, with:   "ssh $SSH_OPTS"
+-	and check to make sure that only the key(s) you wanted were added.
+-
+-	EOF
+-fi
+ 
+ # =-=-=-=
