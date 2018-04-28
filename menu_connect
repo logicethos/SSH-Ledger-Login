@@ -53,12 +53,11 @@ CHOICE=$(dialog --clear \
 
 clear
 
-
-URLSplit=(${URL//:/ })
+IFS=':' read -r -a URLSplit <<< "$URL"
 HOST=${URLSplit[0]}
 if [[ ${#URLSplit[@]} == 1 ]]; then PORT="22"; else PORT="${URLSplit[1]}";fi
 
-#URLSplit=(${URL//@/ })
+#IFS='@' read -r -a URLSplit <<< "$URLSplit"
 #USER=${URLSplit[0]}
 #if [[ ${#URLSplit[@]} == 1 ]]; then USER="root"; else USER="${URLSplit[0]}";fi
 

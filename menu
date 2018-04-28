@@ -1,13 +1,12 @@
 #!/bin/bash
 
-readarray SERVERS < /server.list
+readarray SERVERS < server.list
 
 OPTIONS=()
 for ((i=0;i<${#SERVERS[@]};i++))
 {
       itemno=$(($i + 1))
-
-      SERVERSplit=(${SERVERS[$i]// / })
+      IFS=' ' read -r -a SERVERSplit <<< "${SERVERS[$i]}"
       HOST=${SERVERSplit[0]}
       if [[ ${#SERVERSplit[@]} == 1 ]]; then HNAME=${SERVERSplit[0]}; else HNAME=${SERVERSplit[1]}; fi
       OPTIONS+=($itemno "${HNAME}")
@@ -34,13 +33,18 @@ CHOICE=$(dialog --clear \
 clear
 
 itemno=$(($CHOICE - 1))
-
 URL=${SERVERS[$itemno]}
 
+#If $SUSER has not been set, then use normal user
+if [ -z "$SUSER" ]; then SUSER="$USER"; fi
+
+#If a user has not been specified on the URL, then add $SUSER
+IFS='@' read -r -a URLSplit <<< "$URL"
+if [[ ${#URLSplit[@]} == 1 ]]; then URL="$SUSER@$URL"; fi
 
 if [[ "$CHOICE" =~ ^[0-9]+$ ]] 2> /dev/null
 then
-	source menu_connect $URL ${OPTIONS[$itemno]}
+	source menu_connect $URL
 	if [ $? -ne 0 ]; then read -p "press any key";fi
 else
         exit 0
