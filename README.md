@@ -41,12 +41,22 @@ Install the SSH/PGP Agent application
 
 #### To login from a Linux Client
 
-Create a server.list file:
+If you havn't got this project yet:
+```
+git clone https://github.com/logicethos/SSH-Ledger-Login.git
+cd SSH-Ledger-Login.git
+```
+
+Create a server.list file, with your servers like this:
 ```
 [<user>@]host1[:port] my-server-name1
 [<user>@]host2[:port] my-server-name2
 ```
+Build
 ```
 docker build -t ledger-ssh .
-docker run --rm -it --privileged -e SNAME="user" -v /dev/bus/usb:/dev/bus/usb ledger-ssh
+```
+Now run it.  If you need an alternative login name, add that as an argument.
+```
+docker run --rm -it --privileged -v /dev/bus/usb:/dev/bus/usb ledger-ssh [user]
 ```

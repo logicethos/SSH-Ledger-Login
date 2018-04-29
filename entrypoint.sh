@@ -1,3 +1,3 @@
+#!/bin/sh
 
-
-/bin/bash /usr/bin/byobu
+SUSER=$1 /bin/bash /usr/bin/byobu
